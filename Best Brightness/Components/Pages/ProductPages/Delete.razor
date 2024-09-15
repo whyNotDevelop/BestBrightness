@@ -1,0 +1,72 @@
+﻿@page "/products/delete/{Barcode:long}"
+
+@using Microsoft.EntityFrameworkCore
+@using BestBrightness.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Delete</PageTitle>
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Product</h4>
+    <hr />
+    @if (Product == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-2">Barcode</dt>
+            <dd class="col-sm-10">@Product.Barcode</dd>
+            <dt class="col-sm-2">Name</dt>
+            <dd class="col-sm-10">@Product.Name</dd>
+            <dt class="col-sm-2">Category</dt>
+            <dd class="col-sm-10">@Product.Category</dd>
+            <dt class="col-sm-2">Size</dt>
+            <dd class="col-sm-10">@Product.Size</dd>
+            <dt class="col-sm-2">Quantity</dt>
+            <dd class="col-sm-10">@Product.Quantity</dd>
+            <dt class="col-sm-2">Price</dt>
+            <dd class="col-sm-10">@Product.Price</dd>
+        </dl>
+        <EditForm Model="Product" OnValidSubmit="DeleteProduct">
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-secondary" @onclick="NavigateToList">Back to List</button>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Product? Product;
+
+    [Parameter]
+    public long Barcode { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Product = await context.Products.FindAsync(Barcode);
+
+        if (Product == null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task DeleteProduct()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Products.Remove(Product);
+        await context.SaveChangesAsync();
+        NavigationManager.NavigateTo("/products");
+    }
+
+    private void NavigateToList()
+    {
+        NavigationManager.NavigateTo("/products");
+    }
+}

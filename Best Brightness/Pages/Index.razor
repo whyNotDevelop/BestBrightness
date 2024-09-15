@@ -1,0 +1,94 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components
+
+<PageTitle>Welcome to Best Brightness</PageTitle>
+
+<div class="page landing-page">
+    <div class="header">
+        <h1>Welcome to Best Brightness!</h1>
+        <div class="landing-image">
+            <img src="images/Cleaning.webp" alt="Cleaning Supplies" />
+        </div>
+    </div>
+    <div class="body">
+        <div class="landing-content">
+            <p>At Best Brightness, we pride ourselves on delivering the best household cleaning supplies to keep your homes sparkling clean. Our dedicated team works tirelessly to ensure that every product we offer meets the highest standards of quality and effectiveness.</p>
+            <h2>Dear Team,</h2>
+            
+            <p>Your hard work and dedication are the foundation of our success. Every day, you go above and beyond to ensure our customers receive the best service and products. Together, we create a brighter and cleaner world.</p>
+            <p>Keep pushing forward, stay motivated, and remember that your efforts make a significant difference. Let's continue to shine and make Best Brightness the best it can be!</p>
+            <p>Thank you for your commitment and excellence.</p>
+            <p><strong>Best regards,</strong><br />Mr Msane</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Best Brightness. All rights reserved.</p>
+    </div>
+</div>
+
+<style>
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: #f7f7f7;
+}
+
+.header {
+    background-color: #053767;
+    color: #ffffff;
+    text-align: center;
+    padding: 20px;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+.landing-image img {
+    max-width: 100%;
+    height: auto;
+    max-height: 300px; /* Reduce the height */
+    margin-top: 20px;
+}
+
+.body {
+    flex: 1;
+    padding: 20px;
+    text-align: center;
+}
+
+.body .landing-content {
+    max-width: 800px;
+    margin: 0 auto;
+    color: #3a0647;
+}
+
+.body h2 {
+    font-size: 2em;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.body p {
+    font-size: 1.2em;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.footer {
+    background-color: #3a0647;
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 0;
+}
+
+ (min-width: 641px) {
+    .body {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+</style>

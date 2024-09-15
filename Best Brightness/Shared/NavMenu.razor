@@ -1,0 +1,71 @@
+﻿@namespace BestBrightness.Shared
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IJSRuntime JSRuntime
+
+<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">Best Brightness</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-text ml-auto" id="dateTimeDisplay"></div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="">
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link" @onclick="NavigateToAdminDashboard">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> Admin Dashboard
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link" @onclick="NavigateToSalesDashboard">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> Sales Dashboard
+            </a>
+        </li>
+        <li class="nav-item px-3">
+            <a class="nav-link" @onclick="NavigateToWarehouseDashboard">
+                <span class="oi oi-dashboard" aria-hidden="true"></span> Warehouse Dashboard
+            </a>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void NavigateToAdminDashboard()
+    {
+        Navigation.NavigateTo("/login?redirect=admin-dashboard");
+    }
+
+    private void NavigateToSalesDashboard()
+    {
+        Navigation.NavigateTo("/login?redirect=sales-dashboard");
+    }
+
+    private void NavigateToWarehouseDashboard()
+    {
+        Navigation.NavigateTo("/login?redirect=warehouse-dashboard");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("startClock", "dateTimeDisplay");
+        }
+    }
+}

@@ -1,0 +1,114 @@
+﻿@page "/warehouse-dashboard"
+@using BestBrightness.Data
+@inject ApplicationDbContext dbContext
+@inject NavigationManager Navigation
+
+<h3>Warehouse Dashboard</h3>
+
+<div class="container">
+    <div class="row">
+        <!-- Products Card -->
+        <div class="col-md-6">
+            <div class="card" style="width: 100%; border-radius: 10px;">
+                <div class="card-header">
+                    <h4>Products</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var categoryGroup in products.GroupBy(p => p.Category))
+                    {
+                        <li class="list-group-item">
+                            <button class="btn btn-link" @onclick="() => ToggleCategory(categoryGroup.Key)">
+                                @categoryGroup.Key
+                            </button>
+                            <ul class="list-group list-group-flush" style="display:@(expandedCategories.Contains(categoryGroup.Key) ? "block" : "none");">
+                                @foreach (var product in categoryGroup)
+                                {
+                                    <li class="list-group-item @(product.Quantity < 15 ? "list-group-item-warning" : "")">
+                                        @product.Name - @product.Quantity
+                                    </li>
+                                }
+                            </ul>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Products to Order Card -->
+        <div class="col-md-6">
+            <div class="card" style="width: 100%; border-radius: 10px;">
+                <div class="card-header">
+                    <h4>Products to Order</h4>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach (var product in products.Where(p => p.Quantity < 15))
+                    {
+                        <li class="list-group-item list-group-item-warning">
+                            @product.Name - @product.Quantity
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <!-- Total Number of Products Card -->
+        <div class="col-md-6">
+            <div class="card" style="width: 100%; border-radius: 10px;">
+                <div class="card-header">
+                    <h4>Total Number of Products</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@TotalProductQuantity</h5>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manage Products Card -->
+        <div class="col-md-6">
+            <div class="card" style="width: 100%; border-radius: 10px;">
+                <div class="card-header">
+                    <h4>Manage Products</h4>
+                </div>
+                <div class="card-body text-right">
+                    <button class="btn btn-primary" @onclick="NavigateToManageProducts">Manage Products</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Product> products = new List<Product>();
+    private HashSet<string> expandedCategories = new HashSet<string>();
+
+    private int TotalProductQuantity => products.Sum(p => p.Quantity);
+
+    private void ToggleCategory(string category)
+    {
+        if (expandedCategories.Contains(category))
+        {
+            expandedCategories.Remove(category);
+        }
+        else
+        {
+            expandedCategories.Add(category);
+        }
+    }
+
+    private void LoadProducts()
+    {
+        products = dbContext.Products.ToList();
+    }
+
+    private void NavigateToManageProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+
+    protected override void OnInitialized()
+    {
+        LoadProducts();
+    }
+}

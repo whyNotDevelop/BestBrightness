@@ -1,0 +1,250 @@
+﻿@page "/sales-dashboard"
+@using BestBrightness.Data
+@inject ApplicationDbContext DbContext
+@inject NavigationManager Navigation
+@inject AuthenticationService AuthService
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Timers
+
+<div class="container">
+    <div class="text-end" style="margin-bottom: 10px;">
+        <p>@currentTime</p>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h5 class="card-title" style="font-size: 1.25rem;">Select Product</h5>
+                    <EditForm Model="@saleItemModel" OnValidSubmit="AddItemToCart">
+                        <div class="form-group">
+                            <label for="barcode">Search by Barcode:</label>
+                            <InputText id="barcode" @bind-Value="barcode" class="form-control" />
+                            <button type="button" class="btn btn-primary" @onclick="SearchProduct">Search</button>
+                        </div>
+                        <div class="form-group">
+                            <label for="product">Select Product:</label>
+                            <InputSelect id="product" @bind-Value="saleItemModel.ProductIdString" class="form-control">
+                                <option value="">Select...</option>
+                                @foreach (var product in products)
+                                {
+                                    <option value="@product.Barcode.ToString()">@product.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="form-group">
+                            <label for="quantity">Quantity:</label>
+                            <InputNumber id="quantity" @bind-Value="saleItemModel.Quantity" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add to Cart</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h3 class="card-title">Sale Items</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in saleItems)
+                            {
+                                <tr>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.Price</td>
+                                    <td>@item.Total</td>
+                                    <td>
+                                        <button class="btn btn-danger" @onclick="() => RemoveItem(item)">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="form-group">
+                        <label for="paymentMethod">Payment Method:</label>
+                        <InputSelect id="paymentMethod" @bind-Value="sale.PaymentMethod" class="form-control" @onchange="OnPaymentMethodChanged">
+                            <option value="">Select...</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                        </InputSelect>
+                    </div>
+                    @if (sale.PaymentMethod == "Cash")
+                    {
+                        <div class="form-group" style="margin-top: 10px;">
+                            <label for="amountPaid">Amount Paid:</label>
+                            <InputNumber id="amountPaid" @bind-Value="sale.AmountPaid" class="form-control" @oninput="CalculateChange" />
+                        </div>
+                    }
+                    <div class="d-flex justify-content-between align-items-center" style="margin-top: 10px;">
+                        <h5 style="font-size: 1.5rem;">Total Amount: R @totalAmount</h5>
+                        <button class="btn btn-success btn-lg" @onclick="RecordSale">Record Sale</button>
+                    </div>
+                    @if (sale.PaymentMethod == "Cash")
+                    {
+                        <h5 style="font-size: 1.5rem; margin-top: 10px;">Change: R @change</h5>
+                    }
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @errorMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Product> products = new List<Product>();
+    private List<SaleItem> saleItems = new List<SaleItem>();
+    private SaleItem saleItemModel = new SaleItem();
+    private Sale sale = new Sale();
+    private Employee loggedInEmployee;
+    private decimal totalAmount;
+    private decimal change;
+    private string currentTime;
+    private Timer timer;
+    private string barcode;
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            products = await DbContext.Products.ToListAsync();
+            loggedInEmployee = await AuthService.GetLoggedInEmployee();
+            if (loggedInEmployee == null)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+            sale.EmployeeId = loggedInEmployee.Id;
+            sale.Date = DateTime.Now;
+            StartTimer();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching data: {ex.Message}");
+        }
+    }
+
+    private void StartTimer()
+    {
+        timer = new Timer(1000);
+        timer.Elapsed += UpdateTime;
+        timer.Start();
+    }
+
+    private void UpdateTime(object sender, ElapsedEventArgs e)
+    {
+        currentTime = DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss");
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void AddItemToCart()
+    {
+        if (long.TryParse(saleItemModel.ProductIdString, out long productId))
+        {
+            var selectedProduct = products.FirstOrDefault(p => p.Barcode == productId);
+            if (selectedProduct != null)
+            {
+                saleItemModel.Product = selectedProduct;
+                saleItemModel.ProductId = productId;
+                saleItemModel.Price = selectedProduct.Price;
+                saleItems.Add(saleItemModel);
+                totalAmount += saleItemModel.Total;
+                saleItemModel = new SaleItem();
+            }
+        }
+    }
+
+    private void RemoveItem(SaleItem item)
+    {
+        saleItems.Remove(item);
+        totalAmount -= item.Total;
+    }
+
+    private async void RecordSale()
+    {
+        if (totalAmount == 0)
+        {
+            errorMessage = "Total Amount cannot be zero.";
+            return;
+        }
+
+        if (sale.PaymentMethod == "Cash" && sale.AmountPaid < totalAmount)
+        {
+            errorMessage = "Amount Paid cannot be less than Total Amount.";
+            return;
+        }
+
+        sale.TotalAmount = totalAmount;
+        sale.Change = change;
+        sale.SaleItems = saleItems;
+
+        // Decrease the product quantities
+        foreach (var item in saleItems)
+        {
+            var product = await DbContext.Products.FirstOrDefaultAsync(p => p.Barcode == item.ProductId);
+            if (product != null)
+            {
+                product.Quantity -= item.Quantity;
+                if (product.Quantity < 0)
+                {
+                    product.Quantity = 0;
+                }
+                DbContext.Products.Update(product);
+            }
+        }
+
+        DbContext.Sales.Add(sale);
+        await DbContext.SaveChangesAsync();
+
+        // Redirect to Slip page
+        Navigation.NavigateTo($"/sales-slip/{sale.Id}");
+    }
+
+    private void OnPaymentMethodChanged(ChangeEventArgs e)
+    {
+        if (sale.PaymentMethod == "Card")
+        {
+            sale.AmountPaid = sale.TotalAmount;
+            change = 0;
+        }
+        else if (sale.PaymentMethod == "Cash")
+        {
+            CalculateChange();
+        }
+    }
+
+    private void CalculateChange()
+    {
+        if (sale.PaymentMethod == "Cash")
+        {
+            change = sale.AmountPaid - totalAmount;
+            Console.WriteLine($"Amount Paid: {sale.AmountPaid}, Total Amount: {totalAmount}, Change: {change}");
+        }
+    }
+
+    private async void SearchProduct()
+    {
+        var product = await DbContext.Products.FirstOrDefaultAsync(p => p.Barcode.ToString() == barcode);
+        if (product != null)
+        {
+            saleItemModel.ProductIdString = product.Barcode.ToString();
+            saleItemModel.Product = product;
+            StateHasChanged();
+        }
+    }
+}

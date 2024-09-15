@@ -1,0 +1,152 @@
+﻿@page "/admin-dashboard"
+@using BestBrightness.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext dbContext
+@inject NavigationManager Navigation
+
+<h3>Admin Dashboard</h3>
+
+<div class="container">
+    <div class="row">
+        <!-- Manage Employees Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h5 class="card-title">Manage Employees</h5>
+                    <button class="btn btn-primary" @onclick="NavigateToManageEmployees">Manage Employees</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Sales Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h5 class="card-title">Sales</h5>
+                    <div>
+                        <strong>Total Sales:</strong> @numberOfSales
+                    </div>
+                    <div>
+                        <strong>Amount:</strong> R@($"{totalSalesAmount:0.00}")
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Sales Reports Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Reports</h5>
+                    <button class="btn btn-secondary btn-block mb-2" @onclick="GenerateDailyReport">Daily Report</button>
+                    <button class="btn btn-secondary btn-block mb-2" @onclick="GenerateWeeklyReport">Weekly Report</button>
+                    <button class="btn btn-secondary btn-block" @onclick="GenerateMonthlyReport">Monthly Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sales Reports Section -->
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    <h5 class="card-title">Sales Report</h5>
+                    @if (salesReport != null)
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Employee Id</th>
+                                    <th>Employee</th>
+                                    <th>Date</th>
+                                    <th>Total Amount</th>
+                                    <th>Items</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sale in salesReport)
+                                {
+                                    <tr>
+                                        <td>@sale.EmployeeId</td>
+                                        <td>@sale.Employee.Name</td>
+                                        <td>@sale.Date.ToShortDateString()</td>
+                                        <td>@sale.TotalAmount.ToString("0.00")</td>
+                                        <td><button class="btn btn-info" @onclick="() => ViewItems(sale.Id)">View Items</button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p>No data available.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Sale> salesReport;
+    private decimal totalSalesAmount;
+    private int numberOfSales;
+
+    private void NavigateToManageEmployees()
+    {
+        Navigation.NavigateTo("/employees");
+    }
+
+    private void GenerateDailyReport()
+    {
+        DateTime today = DateTime.Today;
+        salesReport = dbContext.Sales
+            .Where(s => s.Date.Date == today)
+            .Include(s => s.Employee)
+            .ToList();
+        totalSalesAmount = salesReport.Sum(s => s.TotalAmount);
+        numberOfSales = salesReport.Count;
+        StateHasChanged();
+    }
+
+    private void GenerateWeeklyReport()
+    {
+        DateTime startOfWeek = DateTime.Today.AddDays(-((int)DateTime.Today.DayOfWeek));
+        DateTime endOfWeek = startOfWeek.AddDays(7);
+        salesReport = dbContext.Sales
+            .Where(s => s.Date >= startOfWeek && s.Date < endOfWeek)
+            .Include(s => s.Employee)
+            .ToList();
+        totalSalesAmount = salesReport.Sum(s => s.TotalAmount);
+        numberOfSales = salesReport.Count;
+        StateHasChanged();
+    }
+
+    private void GenerateMonthlyReport()
+    {
+        DateTime startOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        DateTime endOfMonth = startOfMonth.AddMonths(1);
+        salesReport = dbContext.Sales
+            .Where(s => s.Date >= startOfMonth && s.Date < endOfMonth)
+            .Include(s => s.Employee)
+            .ToList();
+        totalSalesAmount = salesReport.Sum(s => s.TotalAmount);
+        numberOfSales = salesReport.Count;
+        StateHasChanged();
+    }
+
+    private void ViewItems(int saleId)
+    {
+        // Navigate to Slip page with the saleId
+        Navigation.NavigateTo($"/slip/{saleId}");
+    }
+
+    protected override void OnInitialized()
+    {
+        // Initial data load if necessary
+        totalSalesAmount = 0.0m;
+        numberOfSales = 0;
+    }
+}

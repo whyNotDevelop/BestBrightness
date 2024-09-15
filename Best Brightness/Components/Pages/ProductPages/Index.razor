@@ -1,0 +1,68 @@
+﻿@page "/products"
+
+@using Microsoft.EntityFrameworkCore
+@using BestBrightness.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Products</h1>
+
+<p>
+    <a href="/products/create" class="btn btn-primary">Create New</a>
+</p>
+<p>
+    <a href="/warehouse-dashboard" class="btn btn-secondary">Back</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Barcode</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Size</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Products == null)
+        {
+            <tr>
+                <td colspan="7">
+                    <em>Loading...</em>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var product in Products)
+            {
+                <tr>
+                    <td>@product.Barcode</td>
+                    <td>@product.Name</td>
+                    <td>@product.Category</td>
+                    <td>@product.Size</td>
+                    <td>@product.Quantity</td>
+                    <td>@product.Price</td>
+                    <td>
+                        <a href="/products/edit/@product.Barcode" class="btn btn-primary btn-sm">Edit</a>
+                        <a href="/products/details/@product.Barcode" class="btn btn-info btn-sm">Details</a>
+                        <a href="/products/delete/@product.Barcode" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Product>? Products;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Products = await context.Products.ToListAsync();
+    }
+}

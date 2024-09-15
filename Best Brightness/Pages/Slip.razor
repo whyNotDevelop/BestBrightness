@@ -1,0 +1,105 @@
+﻿@page "/slip/{SaleId:int}"
+@page "/slip"
+@using BestBrightness.Data
+@using Microsoft.EntityFrameworkCore
+@inject ApplicationDbContext dbContext
+@inject NavigationManager Navigation
+
+<PageTitle>Sale Slip</PageTitle>
+
+<div class="container mt-5" style="font-family: 'Courier New', Courier, monospace;">
+    <div class="row">
+        <div class="col-md-12 text-center mb-4">
+            <h2><strong>Sale Slip</strong></h2>
+        </div>
+        <div class="col-md-12">
+            <div class="card" style="box-shadow: 0px 0px 5px rgba(0,0,0,0.1);">
+                <div class="card-body">
+                    @if (Sale != null && Sale.Employee != null)
+                    {
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p><strong>Sale Id:</strong> @Sale.Id</p>
+                                <h5 class="card-title" style="color:black"><strong>Salesperson:</strong> @Sale.Employee.Name (@Sale.EmployeeId)</h5>
+                            </div>
+                            <div class="text-right">
+                                <p><strong></strong> @Sale.Date.ToString("yyyy/MM/dd HH:mm")</p>
+                            </div>
+                        </div>
+                        <div class="text-center mb-4">
+                            <p><strong>Payment Method:</strong> @Sale.PaymentMethod</p>
+                            <p><strong>Amount Paid:</strong> @Sale.AmountPaid</p>                          
+                            <p><strong>Change:</strong> @Sale.Change</p>
+                        </div>
+                    }
+                    <h5><strong>Items</strong></h5>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th><strong>Product</strong></th>
+                                <th><strong>Size</strong></th>
+                                <th><strong>Quantity</strong></th>
+                                <th><strong>Price</strong></th>
+                                <th><strong>Total</strong></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in SaleItems)
+                            {
+                                <tr>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Product.Size</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@item.Price</td>
+                                    <td>@item.Total</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <div class="text-right">
+                        <p><strong>Total Amount:</strong> @Sale.TotalAmount</p>
+                    </div>
+                    <button class="btn btn-secondary" @onclick="GoBack">Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int SaleId { get; set; }
+
+    private Sale Sale { get; set; }
+    private List<SaleItem> SaleItems { get; set; } = new List<SaleItem>();
+
+    protected override void OnInitialized()
+    {
+        LoadSale(SaleId);
+    }
+
+    private void LoadSale(int saleId)
+    {
+        Sale = dbContext.Sales
+            .Include(s => s.Employee)
+            .FirstOrDefault(s => s.Id == saleId);
+
+        if (Sale != null)
+        {
+            LoadSaleItems(saleId);
+        }
+    }
+
+    private void LoadSaleItems(int saleId)
+    {
+        SaleItems = dbContext.SaleItems
+            .Include(si => si.Product)
+            .Where(si => si.SaleId == saleId)
+            .ToList();
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/admin-dashboard");
+    }
+}

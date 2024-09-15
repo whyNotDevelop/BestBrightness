@@ -1,0 +1,66 @@
+﻿@page "/employees"
+@using Microsoft.EntityFrameworkCore
+@using BestBrightness.Data
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Employee List</PageTitle>
+
+<h1>Employee List</h1>
+<a class="btn btn-primary" href="/employees/create">Create New</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Password</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (employees == null)
+        {
+            <tr>
+                <td colspan="5">
+                    <p><em>Loading...</em></p>
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var employee in employees)
+            {
+                <tr>
+                    <td>@employee.Id</td>
+                    <td>@employee.Name</td>
+                    <td>@employee.Role</td>
+                    <td>@employee.Password</td>
+                    <td>
+                        <a class="btn btn-secondary" href="@($"/employees/edit/{employee.Id}")">Edit</a>
+                        <a class="btn btn-info" href="@($"/employees/details/{employee.Id}")">Details</a>
+                        <a class="btn btn-danger" href="@($"/employees/delete/{employee.Id}")">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<button class="btn btn-secondary" @onclick="NavigateBack">Back</button>
+
+@code {
+    private List<Employee>? employees;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        employees = await context.Employees.ToListAsync();
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/admin-dashboard");
+    }
+}
