@@ -1,6 +1,12 @@
 # BestBrightness Store Management System
 
-A web-based application for Best Brightness (cleaning‐products retailer in Ophongolo, KZN) to manage inventory, employees, sales, and reporting. Built with ASP.NET Core Blazor, Entity Framework Core, and SQL Server LocalDB.
+[![.NET](https://img.shields.io/badge/.NET-7.0-blue)](https://dotnet.microsoft.com/)  
+[![Blazor Server](https://img.shields.io/badge/Blazor-Server-blueviolet)](https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor)  
+[![EF Core](https://img.shields.io/badge/EF%20Core-7.0-green)](https://docs.microsoft.com/ef/core/)  
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-LocalDB-red)](https://docs.microsoft.com/sql/)  
+[![GitHub Repo](https://img.shields.io/badge/GitHub%20Repo-whyNotDevelop/BestBrightness-lightgrey)](https://github.com/whyNotDevelop/BestBrightness)  
+
+A web-based ASP.NET Core Blazor application for Best Brightness (cleaning-products retailer in Ophongolo, KZN) to manage inventory, employees, sales, and reporting.
 
 ---
 
@@ -17,42 +23,41 @@ A web-based application for Best Brightness (cleaning‐products retailer in Oph
 - [Project Structure](#project-structure)  
 - [Usage](#usage)  
 - [Contributing](#contributing)  
-- [License](#license)  
 
 ---
 
 ## 📝 Overview
 
-BestBrightness is an ASP.NET Core Blazor application designed to streamline day-to-day operations of a local cleaning-products retailer. It provides:
+BestBrightness provides a centralized, real-time platform for:
 
-- Centralized **inventory management** (products, stock levels, categories)  
-- **Employee administration** (roles, credentials, activity tracking)  
-- **Sales processing** with dynamic **cart**, **payment**, and **change calculation**  
-- **Dashboards** for Admin, Sales, and Warehouse views, including real-time metrics and reports  
-- Printable **sales slips** for customer records  
+1. **Inventory Management** (Products, stock levels, categories)  
+2. **Employee Administration** (Admin configures Employees/Warehouse Managers; CRUD operations for Employee & Warehouse Manager accounts)  
+3. **Sales Processing** (Cart, payment methods, change calculation)  
+4. **Dashboards** (Admin, Sales, Warehouse) with metrics & reports  
+5. **Printable Sales Slips** for customer records  
 
 ---
 
 ## ⭐ Key Features
 
-1. **Admin Dashboard**  
-   - Manage employees (add/update/remove)  
-   - View total sales count and amount  
-   - Generate Daily / Weekly / Monthly sales reports  
+- **Admin Dashboard**  
+  - Add/edit/remove **Employees** & **Warehouse Managers**  
+  - View total sales count & amount  
+  - Generate Daily / Weekly / Monthly sales reports  
 
-2. **Sales Dashboard**  
-   - Add items to cart by barcode lookup  
-   - Select payment method (Cash/Card) with automatic change calculation  
-   - Record sales and update product quantities  
-   - Real-time clock display  
+- **Sales Dashboard**  
+  - Barcode lookup & add items to cart  
+  - Choose payment method (Cash/Card) with automatic change calculation  
+  - Record sales & auto-update inventory  
+  - Real-time clock display  
 
-3. **Warehouse Dashboard**  
-   - View products grouped by category  
-   - Highlight low-stock items (<15 units)  
-   - Toggle category views and see total product count  
+- **Warehouse Dashboard**  
+  - View products grouped by category  
+  - Highlight low-stock items (<15 units)  
+  - Toggle category views & see total inventory count  
 
-4. **Sales Slip Page**  
-   - Printable slip showing sale details, items, totals, and cashier info  
+- **Sales Slip**  
+  - Printable receipt detailing transaction, items, totals, and cashier  
 
 ---
 
@@ -60,10 +65,9 @@ BestBrightness is an ASP.NET Core Blazor application designed to streamline day-
 
 - **Framework:** ASP.NET Core 7.0, Blazor Server  
 - **ORM:** Entity Framework Core  
-- **Database:** SQL Server LocalDB (with sequences for IDs & barcodes)  
+- **Database:** SQL Server LocalDB (with sequences for Admin, Employee, and Product barcodes)  
 - **UI:** Blazor components, Bootstrap 5  
-- **Authentication:** Simple credential-based login (Admin & Employee)  
-- **DI & Configuration:** ASP.NET Core Dependency Injection, `appsettings.json`  
+- **DI & Config:** ASP.NET Core Dependency Injection, `appsettings.json`  
 
 ---
 
@@ -72,8 +76,8 @@ BestBrightness is an ASP.NET Core Blazor application designed to streamline day-
 ### Prerequisites
 
 - [.NET 7.0 SDK](https://dotnet.microsoft.com/download)  
-- SQL Server LocalDB (installed with Visual Studio or separately)  
-- Git (for cloning)  
+- SQL Server LocalDB  
+- Git  
 
 ### Installation
 
